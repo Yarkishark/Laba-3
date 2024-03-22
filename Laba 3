@@ -5,64 +5,59 @@
 
 import random
 
-def fill_matrix(matrix, n):
-    for i in range(n):
-        for j in range(n):
-            matrix[i][j] = random.randint(-10, 10)
-    return matrix
+def fill_matrix(A, B, C, D, E, N):
+    for i in range(N//2):
+        for j in range(N//2):
+            A[i][j] = E[i][j]
+            A[i][j+N//2] = B[i][j]
+            A[i+N//2][j] = D[i][j]
+            A[i+N//2][j+N//2] = C[i][j]
 
-def print_matrix(matrix, n):
-    for i in range(n):
-        for j in range(n):
-            print(matrix[i][j], end=" ")
-        print()
+def count_greater_than_K(matrix, K, area):
+    count = 0
+    for i in range(len(area)):
+        for j in range(len(area[0])):
+            if matrix[i][j] > K:
+                count += 1
+    return count
 
-def generate_F_matrix(matrix, k):
-    count_even_col = 0
-    count_odd_row = 0
-    for i in range(len(matrix)):
-        for j in range(len(matrix)):
-            if j % 2 == 0:
-                if matrix[i][j] > k:
-                    count_even_col += 1
-            else:
-                count_odd_row += sum([x for x in matrix[i]])
+def swap_submatrices(matrix, area1, area2):
+    for i in range(len(area1)):
+        for j in range(len(area1[0])):
+            matrix[area1[0]+i][area1[1]+j], matrix[area2[0]+i][area2[1]+j] = matrix[area2[0]+i][area2[1]+j], matrix[area1[0]+i][area1[1]+j]
 
-    if count_even_col > count_odd_row:
-        matrix[0:2], matrix[2:4] = matrix[2:4], matrix[0:2]
-    else:
-        matrix[0], matrix[1] = matrix[1], matrix[0]
+N = int(input("Введите размер матрицы N: "))
+K = int(input("Введите число K: "))
 
-    return matrix
+A = [[0 for _ in range(N)] for _ in range(N)]
+B = [[random.randint(-10, 10) for _ in range(N//2)] for _ in range(N//2)]
+C = [[random.randint(-10, 10) for _ in range(N//2)] for _ in range(N//2)]
+D = [[random.randint(-10, 10) for _ in range(N//2)] for _ in range(N//2)]
+E = [[random.randint(-10, 10) for _ in range(N//2)] for _ in range(N//2)]
 
-def matrix_multiplication(A, F, K, N):
-    result = [[0 for _ in range(N)] for _ in range(N)]
-    for i in range(N):
-        for j in range(N):
-            result[i][j] = A[i][j] * F[i][j] - K * A[j][i]
-    return result
+fill_matrix(A, B, C, D, E, N)
+print("Матрица A:")
+for row in A:
+    print(row)
 
-def main():
-    K = int(input("Введите значение K: "))
-    N = int(input("Введите значение N: "))
+F = E.copy()
+greater_count = count_greater_than_K(E, K, (0, 0, N//2, N//2))
+sum_odd_rows = sum([sum(row) for i, row in enumerate(C) if i % 2 != 0])
+if greater_count > sum_odd_rows:
+    swap_submatrices(E, (0, 0), (N//2, N//2))
+else:
+    B, C = C, B
 
-    A = [[0 for _ in range(N)] for _ in range(N)]
-    A = fill_matrix(A, N)
+print("Матрица F:")
+for row in F:
+    print(row)
 
-    print("Матрица А:")
-    print_matrix(A, N)
+result = [[0 for _ in range(N)] for _ in range(N)]
+AT = list(zip(*A))
+for i in range(len(A)):
+    for j in range(len(A[0])):
+        result[i][j] = A[i][j]*F[i][j] - K*A^T[i][j]
 
-    F = [[0 for _ in range(N)] for _ in range(N)]
-    F = fill_matrix(F, N)
-    F = generate_F_matrix(F, K)
-
-    print("Матрица F:")
-    print_matrix(F, N)
-
-    result = matrix_multiplication(A, F, K, N)
-
-    print("Результат матричного умножения A*F - K*AT:")
-    print_matrix(result, N)
-
-if __name__ == "__main__":
-    main()
+print("Результат операции A*F - K*A^T:")
+for row in result:
+    print(row)
