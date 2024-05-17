@@ -8,17 +8,6 @@
 
 import random
 
-def count_greater_than_k(val, k):
-    count = 0
-    if val > k:
-        count += 1
-    return count
-
-def count_odd_row_sum(val):
-    row_sum = 0
-    row_sum += val
-    return row_sum
-
 def transpose_matrix(matrix):
     result = [[0 for _ in range(len(matrix))] for _ in range(len(matrix[0]))]
     for i in range(len(matrix)):
@@ -26,46 +15,61 @@ def transpose_matrix(matrix):
             result[j][i] = matrix[i][j]
     return result
 
-K = int(input("Введите число K: "))
-N = int(input("Введите число N: "))
+K = int(input("Введите значение K: "))
+N = int(input("Введите значение N: "))
 
 A = [[random.randint(-10, 10) for _ in range(N)] for _ in range(N)]
-print("Матрица A:")
-for row in A:
-    print(row)
 
 E = [row[:N // 2] for row in A[:N // 2]]
 B = [row[N // 2:] for row in A[:N // 2]]
 D = [row[:N // 2] for row in A[N // 2:]]
 C = [row[N // 2:] for row in A[N // 2:]]
 
-count_col = 0
-for i in range(len(E) // 2):
-    for j in range(i, len(E)):
-        if j % 2 == 0:
-            count_col += count_greater_than_k(E[i][j], K)
+count = 0
+'1 область в E'
+for i in range((N // 2)):
+    for j in range(N // 4):
+        if i < len(E) and j < len(E[i]):
+            if E[i][j] > K:
+                count += 1
+print("Количество чисел больше K в четных столбцах области 1:", count)
 
-sum_row = 0
-for i in range(1, len(E) // 2):
-    for j in range(len(E) - (i + 1)):
-        if i % 2 == 1:
-            sum_row += count_odd_row_sum(E[i][j])
+total_sum = 0
+'3 область в E'
+for i in range((N // 2) // 2, N // 2):
+    for j in range((N // 2) - i - 1, i + 1):
+        if i < len(E) and j < len(E[i]):
+            if j % 2 != 0:
+                total_sum += E[i][j]
+print("Сумма элементов в нечетных строках области 3:", total_sum)
 
-F = A.copy()
-e_copy = E.copy()
-b_copy = B.copy()
-c_copy = C.copy()
-
-if count_col > sum_row:
-    temp = e_copy
-    e_copy = D
-    D = temp
+temp = B
+matr_B = [row[:] for row in B]
+matr_C = [row[:] for row in C]
+matr_E = [row[:] for row in E]
+if count > total_sum:
+    temp_two = matr_E[:]
+    for i in range(len(E)//2):
+        matr_E[i], matr_E[len(E)//2 + (i-(len(E)//2+len(E)//2))] = (temp_two[len(E)//2 + (i-(len(E)//2+len(E)//2))], temp_two[i])
 else:
-    temp = b_copy
-    b_copy = c_copy
-    c_copy = temp
+    matr_B = matr_C
+    matr_C = temp
+F = [[matr_E[i % N//2][j % N//2] for j in range(N)] for i in range(N)]
+for i in range(N):
+    for j in range(N):
+        if 0 <= i < N//2 and 0 <= j < N//2:
+            F[i][j] = matr_E[i][j]
+        elif 0 <= i < N//2 and N//2 <= j < N:
+            F[i][j] = matr_B[i][j - N//2]
+        elif N//2 <= i < N and 0 <= j < N//2:
+            F[i][j] = D[i - N//2][j]
+        else:
+            F[i][j] = matr_C[i - N//2][j - N//2]
+            
+print("Матрица A:")
+for row in A:
+    print(row)
 
-F = [e + b for e, b in zip(e_copy, b_copy)] + [d + c for d, c in zip(D, c_copy)]
 print("Матрица F:")
 for row in F:
     print(row)
@@ -75,3 +79,4 @@ result_matrix = [[A[i][j]*F[i][j] - K*A_transposed[i][j] for j in range(N)] for 
 print("Результат выражения A*F - K*A^T:")
 for row in result_matrix:
     print(row)
+
