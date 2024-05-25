@@ -16,7 +16,14 @@ def transpose_matrix(matrix):
     return result
 
 K = int(input("Введите значение K: "))
-N = int(input("Введите значение N: "))
+
+while True:
+    N = int(input("Введите значение N: "))
+    if N >= 6 and N % 2 == 0:
+        break
+    else:
+        print("Пожалуйста, введите размер/ранг матрицы (N) число больше/равно 6 и четное число для равных по размеру подматриц")
+
 
 A = [[random.randint(-10, 10) for _ in range(N)] for _ in range(N)]
 
